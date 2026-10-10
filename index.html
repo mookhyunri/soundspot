@@ -57,17 +57,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;background:#2a2410;color:var(--acc);margin-left:8px;vertical-align:middle;font-weight:600}
 .small{font-size:12px;color:var(--sub);line-height:1.6;margin-top:8px}
 .hide{display:none}
-#a-map{height:360px;background:#111}
-#a-map.leaflet-container{font-family:inherit;background:#111}
-#a-map .leaflet-tile-pane{-webkit-filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
-#a-map .spot-pin i{display:block;width:22px;height:22px;border-radius:50%;background:var(--acc);border:3px solid #000;box-shadow:0 0 0 1px var(--acc)}
-#a-map .spot-pin.off i{background:#777;box-shadow:0 0 0 1px #777}
-#a-map .me-pin i{display:block;width:16px;height:16px;border-radius:50%;background:#4aa3ff;border:3px solid #fff;box-shadow:0 0 10px #4aa3ff}
-#a-map .leaflet-tooltip.spot-tip{background:#000;color:#f5f5f7;border:1px solid #333;font-family:inherit;font-size:12px;font-weight:600;padding:2px 7px;box-shadow:none}
-#a-map .leaflet-tooltip.spot-tip:before{display:none}
-#a-map .leaflet-popup-content-wrapper,#a-map .leaflet-popup-tip{background:#1a1a1d;color:#f5f5f7}
-#a-map .leaflet-popup-content{font-family:inherit;margin:12px 14px}
-#a-map .mapbtn{background:var(--acc);color:#000;padding:9px 12px;font-size:14px;width:100%}
+.smap{height:360px;background:#111}
+#l-map{height:340px}
+.smap.leaflet-container{font-family:inherit;background:#111}
+.smap .leaflet-tile-pane{-webkit-filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.smap .spot-pin i{display:block;width:22px;height:22px;border-radius:50%;background:var(--acc);border:3px solid #000;box-shadow:0 0 0 1px var(--acc)}
+.smap .spot-pin.off i{background:#777;box-shadow:0 0 0 1px #777}
+.smap .acc-ring{pointer-events:none}
+.smap .me-pin i{display:block;width:16px;height:16px;border-radius:50%;background:#4aa3ff;border:3px solid #fff;box-shadow:0 0 10px #4aa3ff}
+.smap .leaflet-tooltip.spot-tip{background:#000;color:#f5f5f7;border:1px solid #333;font-family:inherit;font-size:12px;font-weight:600;padding:2px 7px;box-shadow:none}
+.smap .leaflet-tooltip.spot-tip:before{display:none}
+.smap .leaflet-popup-content-wrapper,.smap .leaflet-popup-tip{background:#1a1a1d;color:#f5f5f7}
+.smap .leaflet-popup-content{font-family:inherit;margin:12px 14px}
+.smap .mapbtn{background:var(--acc);color:#000;padding:9px 12px;font-size:14px;width:100%}
+.smap .leaflet-bar a{background:#1a1a1d;color:#f5f5f7;border-bottom-color:#333}
+.smap .leaflet-bar{border-color:#333}
 .mapcard{padding:0;overflow:hidden;position:relative;z-index:0}
 .mapcard .pad{padding:14px 18px 16px}
 </style>
@@ -83,6 +87,17 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <button class="big" id="l-start">시작하기</button>
     <div class="bar hide" id="l-bar"><i id="l-barfill"></i></div>
     <div class="stat" id="l-stat" style="margin-top:12px">시작 버튼을 누르고 위치 사용을 허용해 주세요.<br>이용하시는 동안 화면을 켜 두시고 이 페이지를 열어 두세요.</div>
+  </div>
+
+  <div class="card mapcard hide" id="l-mapcard">
+    <div id="l-map" class="smap"></div>
+    <div class="pad">
+      <div class="btns" style="margin-top:0">
+        <button id="l-mapme" class="ghost">내 위치 따라가기</button>
+        <button id="l-mapfit" class="ghost">전체 스팟 보기</button>
+      </div>
+      <div class="small">금색 원이 사운드가 나오는 구역입니다. 파란 점이 내 위치입니다.</div>
+    </div>
   </div>
 
   <div id="l-listwrap">
@@ -103,6 +118,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <div class="f"><div class="label">페이드아웃 시간 <b id="a-fadev"></b></div><input type="range" id="a-fade" min="0" max="10" step="0.5"></div>
     <div class="f"><div class="label">GPS 정확도 필터 <b id="a-accv"></b></div><input type="range" id="a-acc" min="10" max="200" step="5">
       <div class="small">GPS 오차가 이 값보다 크면 판정하지 않습니다. 잘못된 위치로 사운드가 켜지는 것을 막습니다.</div></div>
+    <label class="chk"><input type="checkbox" id="a-showmap"> 청취자에게 지도 보여주기</label>
     <label class="chk"><input type="checkbox" id="a-show"> 청취자에게 스팟 목록과 거리 보여주기</label>
   </div>
 
@@ -112,7 +128,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
   </div>
 
   <div class="card mapcard">
-    <div id="a-map"></div>
+    <div id="a-map" class="smap"></div>
     <div class="pad">
       <div class="btns" style="margin-top:0">
         <button id="a-mapme" class="ghost">내 위치로 이동</button>
@@ -174,7 +190,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 /* ---------- 공통 ---------- */
 var ADMIN = /[?&]admin(=|&|$)/.test(location.search);
 var DRAFT_KEY = 'soundspot_admin_draft_v1';
-var cfg = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, spots:[]};
+var cfg = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, showMap:true, spots:[]};
 
 function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -197,13 +213,14 @@ function dist(lat1, lng1, lat2, lng2){
 function hysteresis(r){ return Math.max(5, r * 0.15); }
 
 function normalize(c){
-  var o = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, spots:[]};
+  var o = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, showMap:true, spots:[]};
   if (c){
     if (typeof c.title === 'string') o.title = c.title;
     if (typeof c.description === 'string') o.description = c.description;
     if (typeof c.fadeSec === 'number') o.fadeSec = c.fadeSec;
     if (typeof c.accMax === 'number') o.accMax = c.accMax;
     if (typeof c.showSpots === 'boolean') o.showSpots = c.showSpots;
+    if (typeof c.showMap === 'boolean') o.showMap = c.showMap;
     if (c.spots && c.spots.length){
       for (var i = 0; i < c.spots.length; i++){
         var s = c.spots[i];
@@ -293,6 +310,22 @@ function stopKey(key, fade){
 }
 function stopAll(fade){ for (var k in playing){ if (playing.hasOwnProperty(k)) stopKey(k, fade); } }
 
+/* ---------- 지도 라이브러리 (Leaflet) ---------- */
+function loadLeaflet(cb, el){
+  if (window.L){ cb(); return; }
+  var css = document.createElement('link');
+  css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(css);
+  var sc = document.createElement('script');
+  sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  sc.onload = cb;
+  sc.onerror = function(){ if (el) el.innerHTML = '<div class="empty">지도를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.</div>'; };
+  document.head.appendChild(sc);
+}
+var OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+var OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>';
+function round6(x){ return Math.round(x * 1e6) / 1e6; }
+
 /* ---------- 화면 꺼짐 방지 ---------- */
 var wakeLock = null;
 function requestWake(){
@@ -326,7 +359,64 @@ function initListener(){
     $('l-desc').innerHTML = esc(cfg.description);
     show($('l-listwrap'), cfg.showSpots);
     renderList();
+    if (cfg.showMap && activeSpots().length){
+      show($('l-mapcard'), true);
+      loadLeaflet(initLMap, $('l-map'));
+    }
   });
+
+  /* 청취자 지도 */
+  var lmap = null, lcircles = {}, lme = null, lacc = null, follow = false, lastMe = null;
+  function initLMap(){
+    lmap = L.map('l-map').setView([37.5665, 126.978], 13);
+    L.tileLayer(OSM_URL, {maxZoom: 19, attribution: OSM_ATTR}).addTo(lmap);
+    var list = activeSpots(), pts = [];
+    for (var i = 0; i < list.length; i++){
+      var s = list[i];
+      lcircles[s.id] = L.circle([s.lat, s.lng], {radius: s.radius, color: '#e8c27a', weight: 1.5, fillColor: '#e8c27a', fillOpacity: 0.12, interactive: false}).addTo(lmap);
+      L.marker([s.lat, s.lng], {interactive: false, icon: L.divIcon({className: 'spot-pin', html: '<i></i>', iconSize: [22, 22], iconAnchor: [11, 11]})})
+        .bindTooltip(esc(s.name), {permanent: true, direction: 'top', offset: [0, -12], className: 'spot-tip'}).addTo(lmap);
+      pts.push([s.lat, s.lng]);
+    }
+    lfit();
+    lmap.on('dragstart', function(){ follow = false; });
+    setTimeout(function(){ lmap.invalidateSize(); lfit(); }, 300);
+  }
+  function lfit(){
+    var list = activeSpots(), pts = [];
+    if (!lmap || !list.length) return;
+    for (var i = 0; i < list.length; i++) pts.push([list[i].lat, list[i].lng]);
+    if (lastMe) pts.push(lastMe);
+    lmap.fitBounds(L.latLngBounds(pts).pad(0.25), {maxZoom: 17});
+  }
+  function lUpdateMe(c){
+    if (!lmap) return;
+    var ll = [c.latitude, c.longitude];
+    var first = !lastMe;
+    lastMe = ll;
+    if (!lme){
+      lacc = L.circle(ll, {radius: c.accuracy, color: '#4aa3ff', weight: 0, fillColor: '#4aa3ff', fillOpacity: 0.12, interactive: false, className: 'acc-ring'}).addTo(lmap);
+      lme = L.marker(ll, {interactive: false, zIndexOffset: 1000, icon: L.divIcon({className: 'me-pin', html: '<i></i>', iconSize: [16, 16], iconAnchor: [8, 8]})}).addTo(lmap);
+    } else { lme.setLatLng(ll); lacc.setLatLng(ll); lacc.setRadius(c.accuracy); }
+    if (first){ follow = true; lmap.setView(ll, Math.max(lmap.getZoom(), 17)); }
+    else if (follow) lmap.panTo(ll);
+  }
+  function lRemoveMe(){
+    if (lmap && lme){ lmap.removeLayer(lme); lmap.removeLayer(lacc); }
+    lme = null; lacc = null; lastMe = null; follow = false;
+  }
+  function lStyles(){
+    for (var id in lcircles){
+      if (!lcircles.hasOwnProperty(id)) continue;
+      var on = !!inside[id];
+      lcircles[id].setStyle({weight: on ? 3 : 1.5, fillOpacity: on ? 0.35 : 0.12});
+    }
+  }
+  $('l-mapme').onclick = function(){
+    if (!lastMe){ toast('시작하기를 누르면 내 위치가 표시됩니다'); return; }
+    follow = true; lmap.setView(lastMe, Math.max(lmap.getZoom(), 17));
+  };
+  $('l-mapfit').onclick = function(){ follow = false; lfit(); };
 
   function renderList(){
     if (!cfg.showSpots) return;
@@ -385,6 +475,7 @@ function initListener(){
 
   function onPos(p){
     var c = p.coords; lastFix = c;
+    lUpdateMe(c);
     var list = activeSpots(), accOk = c.accuracy <= cfg.accMax;
     for (var i = 0; i < list.length; i++){
       var s = list[i];
@@ -395,6 +486,7 @@ function initListener(){
       if (!inside[s.id] && s._d <= s.radius){ inside[s.id] = true; onEnter(s); }
       else if (inside[s.id] && s._d > s.radius + hysteresis(s.radius)){ inside[s.id] = false; onExit(s); }
     }
+    lStyles();
     $('l-stat').innerHTML = '<span class="dot on"></span><b>작동 중</b> · GPS 오차 ±' + Math.round(c.accuracy) + 'm' +
       (accOk ? '' : '<br><span class="warn">GPS 신호가 약해 판정을 잠시 멈췄습니다. 하늘이 트인 곳으로 이동해 주세요.</span>');
     renderList();
@@ -404,7 +496,7 @@ function initListener(){
     if (running){
       running = false;
       if (watchId != null) navigator.geolocation.clearWatch(watchId);
-      watchId = null; inside = {}; stopAll(1); releaseWake();
+      watchId = null; inside = {}; stopAll(1); releaseWake(); lRemoveMe(); lStyles();
       $('l-start').innerHTML = '시작하기'; setCls($('l-start'), 'stop', false);
       $('l-stat').innerHTML = '<span class="dot"></span>정지됨';
       renderList(); return;
@@ -445,7 +537,7 @@ function initAdmin(){
 
   function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(exportObj())); } catch(e){} }
   function exportObj(){
-    var o = {title: cfg.title, description: cfg.description, fadeSec: cfg.fadeSec, accMax: cfg.accMax, showSpots: cfg.showSpots, spots: []};
+    var o = {title: cfg.title, description: cfg.description, fadeSec: cfg.fadeSec, accMax: cfg.accMax, showSpots: cfg.showSpots, showMap: cfg.showMap, spots: []};
     for (var i = 0; i < cfg.spots.length; i++){
       var s = cfg.spots[i];
       o.spots.push({id: s.id, name: s.name, lat: s.lat, lng: s.lng, radius: s.radius, sound: s.sound, mode: s.mode, volume: s.volume, enabled: s.enabled});
@@ -455,7 +547,7 @@ function initAdmin(){
 
   function bindSettings(){
     $('a-title').value = cfg.title; $('a-desc').value = cfg.description;
-    $('a-fade').value = cfg.fadeSec; $('a-acc').value = cfg.accMax; $('a-show').checked = cfg.showSpots;
+    $('a-fade').value = cfg.fadeSec; $('a-acc').value = cfg.accMax; $('a-show').checked = cfg.showSpots; $('a-showmap').checked = cfg.showMap;
     labels();
   }
   function labels(){ $('a-fadev').innerHTML = cfg.fadeSec + '초'; $('a-accv').innerHTML = '±' + cfg.accMax + 'm'; }
@@ -464,6 +556,7 @@ function initAdmin(){
   $('a-fade').oninput = function(){ cfg.fadeSec = parseFloat(this.value); labels(); saveDraft(); };
   $('a-acc').oninput = function(){ cfg.accMax = parseInt(this.value, 10); labels(); saveDraft(); };
   $('a-show').onchange = function(){ cfg.showSpots = this.checked; saveDraft(); };
+  $('a-showmap').onchange = function(){ cfg.showMap = this.checked; saveDraft(); };
 
   function renderAdmin(){
     var h = '';
@@ -518,7 +611,6 @@ function initAdmin(){
     }, function(e){ toast(geoErrMsg(e)); finish(); }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
     timer = setTimeout(finish, 8000);
   }
-  function round6(x){ return Math.round(x * 1e6) / 1e6; }
 
   $('a-addhere').onclick = function(){
     var btn = this; btn.disabled = true; btn.innerHTML = '위치 측정 중…';
@@ -637,23 +729,9 @@ function initAdmin(){
 
   /* 지도 (Leaflet + OpenStreetMap) */
   var map = null, mapLayer = null, meMarker = null, didFit = false;
-  function loadLeaflet(cb){
-    if (window.L){ cb(); return; }
-    var css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(css);
-    var sc = document.createElement('script');
-    sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    sc.onload = cb;
-    sc.onerror = function(){ $('a-map').innerHTML = '<div class="empty">지도를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.</div>'; };
-    document.head.appendChild(sc);
-  }
   function initMap(){
     map = L.map('a-map').setView([37.5665, 126.978], 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-    }).addTo(map);
+    L.tileLayer(OSM_URL, {maxZoom: 19, attribution: OSM_ATTR}).addTo(map);
     mapLayer = L.layerGroup().addTo(map);
     map.on('click', function(e){
       var lat = round6(e.latlng.lat), lng = round6(e.latlng.lng);
@@ -714,7 +792,7 @@ function initAdmin(){
       updateMe(p.coords.latitude, p.coords.longitude);
     }, function(e){ toast(geoErrMsg(e)); }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
   };
-  loadLeaflet(initMap);
+  loadLeaflet(initMap, $('a-map'));
 
   /* 내보내기 */
   function jsonText(){ return JSON.stringify(exportObj(), null, 2); }
