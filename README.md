@@ -1,1 +1,1 @@
-# soundspot
+# wavespot
