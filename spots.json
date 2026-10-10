@@ -1,0 +1,8 @@
+{
+  "title": "사운드 스팟",
+  "description": "지정된 장소에 도착하면 사운드가 재생됩니다.\n시작하기를 누르고 위치 사용을 허용해 주세요.",
+  "fadeSec": 3,
+  "accMax": 50,
+  "showSpots": true,
+  "spots": []
+}

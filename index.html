@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#000000">
+<title>사운드 스팟</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{--bg:#000;--card:#111113;--card2:#1a1a1d;--line:#26262a;--tx:#f5f5f7;--sub:#8e8e93;--acc:#e8c27a;--ok:#5ad08a;--bad:#ff6b6b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding:calc(env(safe-area-inset-top) + 20px) 18px calc(env(safe-area-inset-bottom) + 40px);max-width:560px;margin:0 auto}
+h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin:8px 0 6px}
+.sub{color:var(--sub);font-size:15px;line-height:1.55;white-space:pre-wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:16px}
+.label{font-size:12px;color:var(--sub);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px}
+button,.btn{-webkit-appearance:none;appearance:none;border:0;border-radius:12px;background:var(--card2);color:var(--tx);font:inherit;font-size:15px;font-weight:600;padding:12px 14px;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+button:active,.btn:active{opacity:.7}
+.big{width:100%;padding:18px;font-size:18px;border-radius:16px;background:var(--acc);color:#000}
+.big.stop{background:#2a2a2e;color:var(--tx)}
+.ghost{background:transparent;border:1px solid var(--line)}
+.danger{color:var(--bad)}
+.row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;gap:10px}
+.btns{display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button,.btns .btn{padding:9px 12px;font-size:14px}
+.stat{font-size:14px;color:var(--sub);line-height:1.7}
+.stat b{color:var(--tx);font-weight:600}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#444;margin-right:6px;vertical-align:middle}
+.dot.on{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.spot{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:10px;-webkit-transition:border-color .3s,box-shadow .3s;transition:border-color .3s,box-shadow .3s}
+.spot.in{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 24px rgba(232,194,122,.18)}
+.spot.off{opacity:.45}
+.sname{font-size:17px;font-weight:600}
+.dist{font-size:15px;color:var(--acc);font-variant-numeric:tabular-nums;white-space:nowrap}
+.meta{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.5}
+.warn{color:var(--bad)}
+.empty{color:var(--sub);text-align:center;padding:28px 10px;font-size:14px;line-height:1.6}
+.bar{height:4px;background:#222;border-radius:2px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--acc);-webkit-transition:width .2s;transition:width .2s}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:11px 12px;font:inherit;font-size:16px;-webkit-appearance:none;appearance:none}
+textarea{min-height:70px;resize:vertical}
+.f{margin-top:14px}
+.f .label{margin-bottom:6px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;background:transparent;height:28px}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:#333;border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--tx);margin-top:-9px}
+.chk{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;gap:10px;font-size:15px;margin-top:14px}
+.chk input{width:20px;height:20px}
+.sheet{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,.7);display:none;z-index:2000;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet.show{display:block}
+.sheet .inner{background:#0c0c0e;border:1px solid var(--line);border-radius:20px;max-width:560px;margin:calc(env(safe-area-inset-top) + 20px) auto 40px;padding:20px 18px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);-webkit-transform:translateX(-50%);transform:translateX(-50%);background:#2a2a2e;color:var(--tx);padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;-webkit-transition:opacity .25s;transition:opacity .25s;z-index:2100;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:6px;background:#2a2410;color:var(--acc);margin-left:8px;vertical-align:middle;font-weight:600}
+.small{font-size:12px;color:var(--sub);line-height:1.6;margin-top:8px}
+.hide{display:none}
+#a-map{height:360px;background:#111}
+#a-map.leaflet-container{font-family:inherit;background:#111}
+#a-map .leaflet-tile-pane{-webkit-filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+#a-map .spot-pin i{display:block;width:22px;height:22px;border-radius:50%;background:var(--acc);border:3px solid #000;box-shadow:0 0 0 1px var(--acc)}
+#a-map .spot-pin.off i{background:#777;box-shadow:0 0 0 1px #777}
+#a-map .me-pin i{display:block;width:16px;height:16px;border-radius:50%;background:#4aa3ff;border:3px solid #fff;box-shadow:0 0 10px #4aa3ff}
+#a-map .leaflet-tooltip.spot-tip{background:#000;color:#f5f5f7;border:1px solid #333;font-family:inherit;font-size:12px;font-weight:600;padding:2px 7px;box-shadow:none}
+#a-map .leaflet-tooltip.spot-tip:before{display:none}
+#a-map .leaflet-popup-content-wrapper,#a-map .leaflet-popup-tip{background:#1a1a1d;color:#f5f5f7}
+#a-map .leaflet-popup-content{font-family:inherit;margin:12px 14px}
+#a-map .mapbtn{background:var(--acc);color:#000;padding:9px 12px;font-size:14px;width:100%}
+.mapcard{padding:0;overflow:hidden;position:relative;z-index:0}
+.mapcard .pad{padding:14px 18px 16px}
+</style>
+</head>
+<body>
+
+<!-- ===== 청취자 화면 ===== -->
+<div id="listener" class="hide">
+  <h1 id="l-title">사운드 스팟</h1>
+  <div class="sub" id="l-desc"></div>
+
+  <div class="card">
+    <button class="big" id="l-start">시작하기</button>
+    <div class="bar hide" id="l-bar"><i id="l-barfill"></i></div>
+    <div class="stat" id="l-stat" style="margin-top:12px">시작 버튼을 누르고 위치 사용을 허용해 주세요.<br>이용하시는 동안 화면을 켜 두시고 이 페이지를 열어 두세요.</div>
+  </div>
+
+  <div id="l-listwrap">
+    <div class="label" style="margin-top:22px">사운드 스팟</div>
+    <div id="l-list"></div>
+  </div>
+</div>
+
+<!-- ===== 관리자 화면 ===== -->
+<div id="admin" class="hide">
+  <h1>관리자 <span class="tag">ADMIN</span></h1>
+  <div class="sub">장소와 사운드를 설정한 뒤 <b>spots.json 내려받기</b>로 저장하고, GitHub 저장소에 사운드 파일과 함께 올리면 링크를 받은 모든 분께 반영됩니다.</div>
+
+  <div class="card">
+    <div class="label">기본 정보</div>
+    <div class="f"><div class="label">제목</div><input type="text" id="a-title"></div>
+    <div class="f"><div class="label">안내 문구 (청취자에게 표시)</div><textarea id="a-desc"></textarea></div>
+    <div class="f"><div class="label">페이드아웃 시간 <b id="a-fadev"></b></div><input type="range" id="a-fade" min="0" max="10" step="0.5"></div>
+    <div class="f"><div class="label">GPS 정확도 필터 <b id="a-accv"></b></div><input type="range" id="a-acc" min="10" max="200" step="5">
+      <div class="small">GPS 오차가 이 값보다 크면 판정하지 않습니다. 잘못된 위치로 사운드가 켜지는 것을 막습니다.</div></div>
+    <label class="chk"><input type="checkbox" id="a-show"> 청취자에게 스팟 목록과 거리 보여주기</label>
+  </div>
+
+  <div class="card">
+    <div class="row"><div class="label" style="margin:0">현장 확인</div><button class="ghost" id="a-track" style="padding:8px 12px;font-size:14px">내 위치 추적 시작</button></div>
+    <div class="stat" id="a-stat" style="margin-top:10px">추적을 켜면 각 스팟까지의 실제 거리와 진입 여부가 표시됩니다. 현장에서 반경을 맞출 때 쓰세요.</div>
+  </div>
+
+  <div class="card mapcard">
+    <div id="a-map"></div>
+    <div class="pad">
+      <div class="btns" style="margin-top:0">
+        <button id="a-mapme" class="ghost">내 위치로 이동</button>
+        <button id="a-mapfit" class="ghost">모든 스팟 보기</button>
+      </div>
+      <div class="small"><b>지도를 탭(클릭)</b>하면 그 자리에 스팟을 추가할 수 있습니다.<br><b>금색 점을 누른 채 끌면</b> 위치가 옮겨지고, <b>점을 탭</b>하면 편집 창이 열립니다. 점 주변의 원이 반경입니다.</div>
+    </div>
+  </div>
+
+  <div class="label" style="margin-top:22px">스팟 목록</div>
+  <div id="a-list"></div>
+  <div class="btns">
+    <button id="a-addhere" style="background:var(--acc);color:#000">＋ 현재 위치에 추가</button>
+    <button id="a-addman" class="ghost">＋ 좌표로 추가</button>
+  </div>
+
+  <div class="card">
+    <div class="label">저장 · 반영</div>
+    <div class="btns" style="margin-top:0">
+      <button id="a-export" style="background:var(--acc);color:#000">spots.json 내려받기</button>
+      <button id="a-copy" class="ghost">내용 복사</button>
+      <button id="a-reload" class="ghost">서버 설정 다시 불러오기</button>
+    </div>
+    <div class="small">작업 중인 내용은 이 기기에 임시 저장됩니다. 다른 사람에게 반영하려면 반드시 내려받은 spots.json을 GitHub에 올려 주세요.<br>사운드 파일은 GitHub 저장소의 <b>sounds</b> 폴더에, 아래에 적힌 파일명 그대로 올려야 합니다.</div>
+  </div>
+</div>
+
+<!-- ===== 스팟 편집 시트 ===== -->
+<div class="sheet" id="sheet"><div class="inner">
+  <div class="row"><h1 style="font-size:22px;margin:0" id="e-head">스팟 편집</h1><button class="ghost" id="e-cancel" style="padding:8px 12px">닫기</button></div>
+  <div class="f"><div class="label">이름</div><input type="text" id="e-name"></div>
+  <div class="f"><div class="label">좌표 (위도, 경도)</div><input type="text" id="e-coord" placeholder="37.566535, 126.977969" inputmode="decimal">
+    <div class="btns"><button id="e-here" class="ghost">현재 위치로 갱신</button></div>
+    <div class="small" id="e-locstat"></div></div>
+  <div class="f"><div class="label">반경 <b id="e-radv"></b></div><input type="range" id="e-rad" min="5" max="300" step="5"></div>
+  <div class="f"><div class="label">사운드 파일명 (sounds 폴더 안)</div><input type="text" id="e-file" placeholder="예: spot1.mp3" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <div class="btns"><label class="btn ghost">파일 선택해서 미리듣기<input type="file" id="e-pick" accept="audio/*" style="display:none"></label><button id="e-test" class="ghost">미리듣기</button></div>
+    <div class="small" id="e-filestat">파일을 선택하면 파일명이 자동으로 채워집니다. 영문·숫자 파일명을 권장합니다.</div></div>
+  <div class="f"><div class="label">재생 방식</div>
+    <select id="e-mode">
+      <option value="loop">머무는 동안 반복, 벗어나면 페이드아웃</option>
+      <option value="once_fade">진입 시 1회 재생, 벗어나면 페이드아웃</option>
+      <option value="once_full">진입 시 1회 재생, 벗어나도 끝까지</option>
+    </select></div>
+  <div class="f"><div class="label">볼륨 <b id="e-volv"></b></div><input type="range" id="e-vol" min="0" max="100" step="1"></div>
+  <label class="chk"><input type="checkbox" id="e-en"> 이 스팟 사용</label>
+  <div class="btns" style="margin-top:22px">
+    <button id="e-save" style="background:var(--acc);color:#000;-webkit-flex:1;flex:1">저장</button>
+    <button id="e-del" class="ghost danger">삭제</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- 공통 ---------- */
+var ADMIN = /[?&]admin(=|&|$)/.test(location.search);
+var DRAFT_KEY = 'soundspot_admin_draft_v1';
+var cfg = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, spots:[]};
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function show(el, on){ var c = el.className.replace(/\s*\bhide\b/g, ''); el.className = on ? c : (c + ' hide'); }
+function setCls(el, cls, on){ var re = new RegExp('\\s*\\b' + cls + '\\b', 'g'); var c = el.className.replace(re, ''); el.className = on ? (c + ' ' + cls) : c; }
+var toastT;
+function toast(msg){ var t = $('toast'); t.innerHTML = esc(msg); setCls(t, 'show', true); clearTimeout(toastT); toastT = setTimeout(function(){ setCls(t, 'show', false); }, 2600); }
+function uid(){ return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function fmtDist(m){ return m < 1000 ? Math.round(m) + 'm' : (m / 1000).toFixed(2) + 'km'; }
+function modeLabel(m){ return m === 'loop' ? '반복' : (m === 'once_fade' ? '1회·페이드' : '1회·끝까지'); }
+function soundUrl(name){ return 'sounds/' + encodeURIComponent(name); }
+function mapUrl(s){ return 'https://maps.apple.com/?ll=' + s.lat + ',' + s.lng + '&q=' + encodeURIComponent(s.name); }
+
+function dist(lat1, lng1, lat2, lng2){
+  var R = 6371000, toR = Math.PI / 180;
+  var dLat = (lat2 - lat1) * toR, dLng = (lng2 - lng1) * toR;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * toR) * Math.cos(lat2 * toR) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function hysteresis(r){ return Math.max(5, r * 0.15); }
+
+function normalize(c){
+  var o = {title:'사운드 스팟', description:'', fadeSec:3, accMax:50, showSpots:true, spots:[]};
+  if (c){
+    if (typeof c.title === 'string') o.title = c.title;
+    if (typeof c.description === 'string') o.description = c.description;
+    if (typeof c.fadeSec === 'number') o.fadeSec = c.fadeSec;
+    if (typeof c.accMax === 'number') o.accMax = c.accMax;
+    if (typeof c.showSpots === 'boolean') o.showSpots = c.showSpots;
+    if (c.spots && c.spots.length){
+      for (var i = 0; i < c.spots.length; i++){
+        var s = c.spots[i];
+        if (typeof s.lat !== 'number' || typeof s.lng !== 'number') continue;
+        o.spots.push({ id: s.id || uid(), name: s.name || ('스팟 ' + (i + 1)), lat: s.lat, lng: s.lng,
+          radius: s.radius || 30, sound: s.sound || '', mode: s.mode || 'loop',
+          volume: (typeof s.volume === 'number') ? s.volume : 1, enabled: s.enabled !== false });
+      }
+    }
+  }
+  return o;
+}
+
+function loadServerConfig(cb){
+  var x = new XMLHttpRequest();
+  x.open('GET', 'spots.json?v=' + Date.now(), true);
+  x.onload = function(){
+    if (x.status >= 200 && x.status < 300){
+      try { cb(normalize(JSON.parse(x.responseText)), null); } catch(e){ cb(null, 'spots.json 형식 오류'); }
+    } else cb(null, 'spots.json을 찾을 수 없습니다 (' + x.status + ')');
+  };
+  x.onerror = function(){ cb(null, '네트워크 오류'); };
+  x.send();
+}
+
+function fetchBytes(url, cb){
+  var x = new XMLHttpRequest();
+  x.open('GET', url, true);
+  x.responseType = 'arraybuffer';
+  x.onload = function(){ cb((x.status >= 200 && x.status < 300) ? x.response : null); };
+  x.onerror = function(){ cb(null); };
+  x.send();
+}
+
+/* ---------- 오디오 ---------- */
+var AC = null;
+var playing = {}; // key -> {src, gain}
+function ensureAC(){
+  if (!AC){
+    var C = window.AudioContext || window.webkitAudioContext;
+    if (!C){ toast('이 브라우저는 오디오 재생을 지원하지 않습니다'); return null; }
+    AC = new C();
+  }
+  if (navigator.audioSession){ try { navigator.audioSession.type = 'playback'; } catch(e){} }
+  if (AC.state === 'suspended' && AC.resume) AC.resume();
+  return AC;
+}
+function unlockAudio(){
+  if (!ensureAC()) return;
+  var b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource();
+  s.buffer = b; s.connect(AC.destination);
+  if (s.start) s.start(0); else s.noteOn(0);
+}
+function decode(bytes, cb){
+  if (!ensureAC() || !bytes){ cb(null); return; }
+  var copy = bytes.slice(0);
+  try {
+    var p = AC.decodeAudioData(copy, function(b){ cb(b); }, function(){ cb(null); });
+    if (p && p['catch']) p['catch'](function(){});
+  } catch(e){ cb(null); }
+}
+function playBuffer(key, buffer, vol, loop, onEnd){
+  if (!ensureAC() || !buffer) return;
+  stopKey(key, 0);
+  var src = AC.createBufferSource(), g = AC.createGain();
+  src.buffer = buffer; src.loop = !!loop;
+  src.connect(g); g.connect(AC.destination);
+  var now = AC.currentTime;
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(vol, now + 0.4);
+  var rec = {src: src, gain: g};
+  playing[key] = rec;
+  src.onended = function(){ if (playing[key] === rec){ delete playing[key]; if (onEnd) onEnd(); } };
+  if (src.start) src.start(0); else src.noteOn(0);
+}
+function stopKey(key, fade){
+  var p = playing[key];
+  if (!p || !AC) return;
+  delete playing[key];
+  var now = AC.currentTime;
+  try {
+    p.gain.gain.cancelScheduledValues(now);
+    p.gain.gain.setValueAtTime(p.gain.gain.value, now);
+    p.gain.gain.linearRampToValueAtTime(0, now + Math.max(0.05, fade));
+    p.src.stop(now + Math.max(0.05, fade) + 0.05);
+  } catch(e){ try { p.src.stop(0); } catch(e2){} }
+}
+function stopAll(fade){ for (var k in playing){ if (playing.hasOwnProperty(k)) stopKey(k, fade); } }
+
+/* ---------- 화면 꺼짐 방지 ---------- */
+var wakeLock = null;
+function requestWake(){
+  if (!('wakeLock' in navigator)) return;
+  try {
+    navigator.wakeLock.request('screen').then(function(w){ wakeLock = w; })['catch'](function(){});
+  } catch(e){}
+}
+function releaseWake(){ if (wakeLock){ try { wakeLock.release(); } catch(e){} wakeLock = null; } }
+
+function geoErrMsg(e){
+  if (e && e.code === 1) return '위치 권한이 거부되었습니다. 설정 > 개인정보 보호 및 보안 > 위치 서비스 > Safari 웹 사이트에서 허용해 주세요.';
+  if (e && e.code === 3) return '위치 확인 시간이 초과되었습니다. 하늘이 트인 곳에서 다시 시도해 주세요.';
+  return '위치를 가져올 수 없습니다.';
+}
+
+/* =========================================================
+   청취자 모드
+   ========================================================= */
+function initListener(){
+  show($('listener'), true);
+  var running = false, watchId = null, inside = {}, lastFix = null;
+  var bytes = {}, buffers = {}, decoding = {};
+  var LOAD_NEAR = 150, DROP_FAR = 400;
+
+  loadServerConfig(function(c, err){
+    if (err){ $('l-stat').innerHTML = '<span class="warn">' + esc(err) + '</span>'; return; }
+    cfg = c;
+    $('l-title').innerHTML = esc(cfg.title);
+    document.title = cfg.title;
+    $('l-desc').innerHTML = esc(cfg.description);
+    show($('l-listwrap'), cfg.showSpots);
+    renderList();
+  });
+
+  function renderList(){
+    if (!cfg.showSpots) return;
+    var list = activeSpots(), h = '';
+    if (!list.length){ $('l-list').innerHTML = '<div class="empty">등록된 스팟이 없습니다.</div>'; return; }
+    for (var i = 0; i < list.length; i++){
+      var s = list[i];
+      h += '<div class="spot' + (inside[s.id] ? ' in' : '') + '"><div class="row"><div class="sname">' + esc(s.name) +
+        '</div><div class="dist">' + (s._d == null ? '—' : (inside[s.id] ? '재생 중' : fmtDist(s._d))) + '</div></div></div>';
+    }
+    $('l-list').innerHTML = h;
+  }
+  function activeSpots(){ var a = []; for (var i = 0; i < cfg.spots.length; i++){ if (cfg.spots[i].enabled && cfg.spots[i].sound) a.push(cfg.spots[i]); } return a; }
+
+  function preload(done){
+    var list = activeSpots(), total = list.length, n = 0, failed = [];
+    if (!total){ done(); return; }
+    show($('l-bar'), true);
+    $('l-stat').innerHTML = '사운드 준비 중… 0 / ' + total;
+    for (var i = 0; i < list.length; i++){
+      (function(s){
+        fetchBytes(soundUrl(s.sound), function(b){
+          if (b) bytes[s.id] = b; else failed.push(s.sound);
+          n++;
+          $('l-barfill').style.width = Math.round(n / total * 100) + '%';
+          $('l-stat').innerHTML = '사운드 준비 중… ' + n + ' / ' + total;
+          if (n === total){
+            show($('l-bar'), false);
+            if (failed.length) toast('불러오지 못한 사운드: ' + failed.join(', '));
+            done();
+          }
+        });
+      })(list[i]);
+    }
+  }
+  function ensureDecoded(s, cb){
+    if (buffers[s.id]){ if (cb) cb(buffers[s.id]); return; }
+    if (decoding[s.id]){ if (cb) decoding[s.id].push(cb); return; }
+    if (!bytes[s.id]){ if (cb) cb(null); return; }
+    decoding[s.id] = cb ? [cb] : [];
+    decode(bytes[s.id], function(b){
+      buffers[s.id] = b;
+      var q = decoding[s.id]; delete decoding[s.id];
+      for (var i = 0; i < q.length; i++) q[i](b);
+    });
+  }
+
+  function onEnter(s){
+    ensureDecoded(s, function(b){
+      if (!b || !inside[s.id] || !running) return;
+      playBuffer(s.id, b, s.volume, s.mode === 'loop', function(){ renderList(); });
+      renderList();
+    });
+  }
+  function onExit(s){ if (s.mode !== 'once_full') stopKey(s.id, cfg.fadeSec); }
+
+  function onPos(p){
+    var c = p.coords; lastFix = c;
+    var list = activeSpots(), accOk = c.accuracy <= cfg.accMax;
+    for (var i = 0; i < list.length; i++){
+      var s = list[i];
+      s._d = dist(c.latitude, c.longitude, s.lat, s.lng);
+      if (s._d < s.radius + LOAD_NEAR) ensureDecoded(s);
+      else if (s._d > s.radius + DROP_FAR && !playing[s.id]) delete buffers[s.id];
+      if (!accOk) continue;
+      if (!inside[s.id] && s._d <= s.radius){ inside[s.id] = true; onEnter(s); }
+      else if (inside[s.id] && s._d > s.radius + hysteresis(s.radius)){ inside[s.id] = false; onExit(s); }
+    }
+    $('l-stat').innerHTML = '<span class="dot on"></span><b>작동 중</b> · GPS 오차 ±' + Math.round(c.accuracy) + 'm' +
+      (accOk ? '' : '<br><span class="warn">GPS 신호가 약해 판정을 잠시 멈췄습니다. 하늘이 트인 곳으로 이동해 주세요.</span>');
+    renderList();
+  }
+
+  $('l-start').onclick = function(){
+    if (running){
+      running = false;
+      if (watchId != null) navigator.geolocation.clearWatch(watchId);
+      watchId = null; inside = {}; stopAll(1); releaseWake();
+      $('l-start').innerHTML = '시작하기'; setCls($('l-start'), 'stop', false);
+      $('l-stat').innerHTML = '<span class="dot"></span>정지됨';
+      renderList(); return;
+    }
+    if (!navigator.geolocation){ toast('이 브라우저는 위치 기능을 지원하지 않습니다'); return; }
+    unlockAudio();
+    requestWake();
+    running = true;
+    $('l-start').innerHTML = '정지'; setCls($('l-start'), 'stop', true);
+    preload(function(){
+      if (!running) return;
+      $('l-stat').innerHTML = '위치 확인 중…';
+      watchId = navigator.geolocation.watchPosition(onPos, function(e){
+        $('l-stat').innerHTML = '<span class="warn">' + esc(geoErrMsg(e)) + '</span>';
+      }, {enableHighAccuracy: true, maximumAge: 0, timeout: 20000});
+    });
+  };
+
+  document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible' && running){ ensureAC(); requestWake(); }
+  });
+}
+
+/* =========================================================
+   관리자 모드
+   ========================================================= */
+function initAdmin(){
+  show($('admin'), true);
+  document.title = '관리자 · 사운드 스팟';
+  var tracking = false, trackId = null, fix = null;
+  var localFiles = {}; // 파일명 -> ArrayBuffer (미리듣기용)
+  var editing = null, isNew = false;
+
+  var draft = null;
+  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)); } catch(e){}
+  if (draft){ cfg = normalize(draft); bindSettings(); renderAdmin(); renderMap(); toast('이 기기에 임시 저장된 작업을 불러왔습니다'); }
+  else loadServerConfig(function(c, err){ if (c) cfg = c; else toast('서버 설정이 없어 새로 시작합니다'); bindSettings(); renderAdmin(); renderMap(); });
+
+  function saveDraft(){ try { localStorage.setItem(DRAFT_KEY, JSON.stringify(exportObj())); } catch(e){} }
+  function exportObj(){
+    var o = {title: cfg.title, description: cfg.description, fadeSec: cfg.fadeSec, accMax: cfg.accMax, showSpots: cfg.showSpots, spots: []};
+    for (var i = 0; i < cfg.spots.length; i++){
+      var s = cfg.spots[i];
+      o.spots.push({id: s.id, name: s.name, lat: s.lat, lng: s.lng, radius: s.radius, sound: s.sound, mode: s.mode, volume: s.volume, enabled: s.enabled});
+    }
+    return o;
+  }
+
+  function bindSettings(){
+    $('a-title').value = cfg.title; $('a-desc').value = cfg.description;
+    $('a-fade').value = cfg.fadeSec; $('a-acc').value = cfg.accMax; $('a-show').checked = cfg.showSpots;
+    labels();
+  }
+  function labels(){ $('a-fadev').innerHTML = cfg.fadeSec + '초'; $('a-accv').innerHTML = '±' + cfg.accMax + 'm'; }
+  $('a-title').oninput = function(){ cfg.title = this.value; saveDraft(); };
+  $('a-desc').oninput = function(){ cfg.description = this.value; saveDraft(); };
+  $('a-fade').oninput = function(){ cfg.fadeSec = parseFloat(this.value); labels(); saveDraft(); };
+  $('a-acc').oninput = function(){ cfg.accMax = parseInt(this.value, 10); labels(); saveDraft(); };
+  $('a-show').onchange = function(){ cfg.showSpots = this.checked; saveDraft(); };
+
+  function renderAdmin(){
+    var h = '';
+    if (!cfg.spots.length) h = '<div class="empty">아직 등록된 스팟이 없습니다.<br>현장에서 <b>현재 위치에 추가</b>를 눌러 첫 장소를 등록해 주세요.</div>';
+    for (var i = 0; i < cfg.spots.length; i++){
+      var s = cfg.spots[i], d = null, inn = false;
+      if (fix){ d = dist(fix.latitude, fix.longitude, s.lat, s.lng); inn = d <= s.radius; }
+      h += '<div class="spot' + (inn ? ' in' : '') + (s.enabled ? '' : ' off') + '">' +
+        '<div class="row"><div class="sname">' + esc(s.name) + '</div><div class="dist">' + (d == null ? '' : (inn ? '진입 · ' : '') + fmtDist(d)) + '</div></div>' +
+        '<div class="meta">반경 ' + s.radius + 'm · ' + modeLabel(s.mode) + ' · 볼륨 ' + Math.round(s.volume * 100) + '%<br>' +
+        (s.sound ? 'sounds/' + esc(s.sound) : '<span class="warn">사운드 미지정</span>') + '</div>' +
+        '<div class="btns"><button data-act="edit" data-i="' + i + '">편집</button>' +
+        '<button data-act="test" data-i="' + i + '">' + (playing['t_' + s.id] ? '정지' : '미리듣기') + '</button>' +
+        '<a class="btn" href="' + mapUrl(s) + '" target="_blank">지도</a></div></div>';
+    }
+    $('a-list').innerHTML = h;
+  }
+
+  $('a-list').onclick = function(e){
+    var t = e.target;
+    while (t && t !== this && !t.getAttribute('data-act')) t = t.parentNode;
+    if (!t || t === this) return;
+    var s = cfg.spots[parseInt(t.getAttribute('data-i'), 10)];
+    if (t.getAttribute('data-act') === 'edit') openEditor(s, false);
+    else previewSpot(s, 't_' + s.id);
+  };
+
+  function previewSpot(s, key){
+    if (playing[key]){ stopKey(key, 0.3); renderAdmin(); updateTestBtn(); return; }
+    unlockAudio();
+    var nm = s.sound;
+    if (!nm){ toast('사운드 파일명이 없습니다'); return; }
+    function go(b){
+      if (!b){ toast('재생 실패: ' + nm + ' 파일을 찾을 수 없거나 지원하지 않는 형식입니다'); return; }
+      playBuffer(key, b, s.volume, false, function(){ renderAdmin(); updateTestBtn(); });
+      renderAdmin(); updateTestBtn();
+    }
+    if (localFiles[nm]) decode(localFiles[nm], go);
+    else { toast('서버에서 불러오는 중…'); fetchBytes(soundUrl(nm), function(bytes){ decode(bytes, go); }); }
+  }
+
+  /* 현재 위치 측정: 최대 8초 동안 측정해 가장 정확한 값 사용 */
+  function measure(onProg, done){
+    if (!navigator.geolocation){ toast('위치 기능을 지원하지 않습니다'); return; }
+    var best = null, finished = false, wid, timer;
+    function finish(){ if (finished) return; finished = true; navigator.geolocation.clearWatch(wid); clearTimeout(timer); done(best); }
+    wid = navigator.geolocation.watchPosition(function(p){
+      var c = p.coords;
+      if (!best || c.accuracy < best.accuracy) best = {lat: c.latitude, lng: c.longitude, accuracy: c.accuracy};
+      onProg(best);
+      if (best.accuracy <= 6) finish();
+    }, function(e){ toast(geoErrMsg(e)); finish(); }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
+    timer = setTimeout(finish, 8000);
+  }
+  function round6(x){ return Math.round(x * 1e6) / 1e6; }
+
+  $('a-addhere').onclick = function(){
+    var btn = this; btn.disabled = true; btn.innerHTML = '위치 측정 중…';
+    measure(function(b){ btn.innerHTML = '측정 중 ±' + Math.round(b.accuracy) + 'm'; }, function(b){
+      btn.disabled = false; btn.innerHTML = '＋ 현재 위치에 추가';
+      if (!b) return;
+      openEditor(newSpot(round6(b.lat), round6(b.lng)), true);
+      $('e-locstat').innerHTML = '측정 오차 ±' + Math.round(b.accuracy) + 'm';
+    });
+  };
+  $('a-addman').onclick = function(){
+    openEditor(newSpot(0, 0), true);
+    $('e-coord').value = '';
+  };
+
+  /* 편집 시트 */
+  function openEditor(s, nw){
+    editing = {id: s.id, name: s.name, lat: s.lat, lng: s.lng, radius: s.radius, sound: s.sound, mode: s.mode, volume: s.volume, enabled: s.enabled};
+    isNew = nw;
+    $('e-head').innerHTML = nw ? '새 스팟' : '스팟 편집';
+    $('e-name').value = s.name;
+    $('e-coord').value = s.lat + ', ' + s.lng;
+    $('e-rad').value = s.radius; $('e-vol').value = Math.round(s.volume * 100);
+    $('e-file').value = s.sound; $('e-mode').value = s.mode; $('e-en').checked = s.enabled;
+    $('e-locstat').innerHTML = 'PC 구글 지도에서 장소를 마우스 오른쪽 클릭 → 맨 위 숫자를 클릭하면 좌표가 복사됩니다. 여기에 그대로 붙여넣으세요.';
+    $('e-filestat').innerHTML = '파일을 선택하면 파일명이 자동으로 채워집니다. 영문·숫자 파일명을 권장합니다.';
+    show($('e-del'), !nw);
+    edLabels(); updateTestBtn();
+    setCls($('sheet'), 'show', true);
+  }
+  function edLabels(){ $('e-radv').innerHTML = $('e-rad').value + 'm'; $('e-volv').innerHTML = $('e-vol').value + '%'; }
+  $('e-rad').oninput = edLabels; $('e-vol').oninput = edLabels;
+  function closeEditor(){ stopKey('preview', 0.2); setCls($('sheet'), 'show', false); editing = null; }
+  $('e-cancel').onclick = closeEditor;
+
+  $('e-here').onclick = function(){
+    var btn = this; btn.disabled = true;
+    measure(function(b){ $('e-locstat').innerHTML = '측정 중… ±' + Math.round(b.accuracy) + 'm'; }, function(b){
+      btn.disabled = false;
+      if (!b) return;
+      $('e-coord').value = round6(b.lat) + ', ' + round6(b.lng);
+      $('e-locstat').innerHTML = '측정 오차 ±' + Math.round(b.accuracy) + 'm';
+    });
+  };
+
+  $('e-pick').onchange = function(){
+    var f = this.files && this.files[0];
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      localFiles[f.name] = r.result;
+      $('e-file').value = f.name;
+      var mb = (f.size / 1048576).toFixed(1);
+      $('e-filestat').innerHTML = '선택됨: ' + esc(f.name) + ' (' + mb + 'MB)' +
+        (f.size > 25 * 1048576 ? '<br><span class="warn">25MB를 넘으면 GitHub 웹 업로드가 되지 않습니다. 용량을 줄여 주세요.</span>' : '') +
+        (/^[A-Za-z0-9._-]+$/.test(f.name) ? '' : '<br><span class="warn">한글·공백이 들어간 파일명은 영문으로 바꾸는 것을 권장합니다.</span>');
+    };
+    r.readAsArrayBuffer(f);
+    this.value = '';
+  };
+
+  function updateTestBtn(){ $('e-test').innerHTML = playing['preview'] ? '정지' : '미리듣기'; }
+  $('e-test').onclick = function(){
+    previewSpot({sound: $('e-file').value.replace(/^\s+|\s+$/g, ''), volume: parseInt($('e-vol').value, 10) / 100}, 'preview');
+  };
+
+  function parseCoord(t){
+    var m = String(t).match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    var la = parseFloat(m[1]), ln = parseFloat(m[2]);
+    if (la < -90 || la > 90 || ln < -180 || ln > 180) return null;
+    return {lat: la, lng: ln};
+  }
+
+  $('e-save').onclick = function(){
+    var c = parseCoord($('e-coord').value);
+    if (!c || (c.lat === 0 && c.lng === 0)){ toast('좌표를 "위도, 경도" 형식으로 입력해 주세요'); return; }
+    editing.name = $('e-name').value || '이름 없음';
+    editing.lat = c.lat; editing.lng = c.lng;
+    editing.radius = parseInt($('e-rad').value, 10);
+    editing.volume = parseInt($('e-vol').value, 10) / 100;
+    editing.sound = $('e-file').value.replace(/^\s+|\s+$/g, '');
+    editing.mode = $('e-mode').value; editing.enabled = $('e-en').checked;
+    if (isNew) cfg.spots.push(editing);
+    else for (var i = 0; i < cfg.spots.length; i++) if (cfg.spots[i].id === editing.id) cfg.spots[i] = editing;
+    saveDraft(); closeEditor(); renderAdmin(); renderMap(); toast('저장했습니다 (이 기기)');
+  };
+  $('e-del').onclick = function(){
+    if (!confirm('이 스팟을 삭제할까요?')) return;
+    for (var i = 0; i < cfg.spots.length; i++) if (cfg.spots[i].id === editing.id){ cfg.spots.splice(i, 1); break; }
+    saveDraft(); closeEditor(); renderAdmin(); renderMap();
+  };
+
+  /* 현장 추적 */
+  $('a-track').onclick = function(){
+    if (tracking){
+      tracking = false; navigator.geolocation.clearWatch(trackId); fix = null; releaseWake(); removeMe();
+      this.innerHTML = '내 위치 추적 시작';
+      $('a-stat').innerHTML = '추적을 멈췄습니다.'; renderAdmin(); return;
+    }
+    if (!navigator.geolocation){ toast('위치 기능을 지원하지 않습니다'); return; }
+    tracking = true; this.innerHTML = '추적 중지'; requestWake();
+    $('a-stat').innerHTML = '위치 확인 중…';
+    trackId = navigator.geolocation.watchPosition(function(p){
+      fix = p.coords;
+      updateMe(fix.latitude, fix.longitude);
+      $('a-stat').innerHTML = '<span class="dot on"></span>GPS 오차 <b>±' + Math.round(fix.accuracy) + 'm</b>' +
+        (fix.accuracy > cfg.accMax ? ' <span class="warn">(필터 ±' + cfg.accMax + 'm 초과 — 청취자 화면에선 판정 보류)</span>' : '') +
+        '<br>현재 좌표 ' + round6(fix.latitude) + ', ' + round6(fix.longitude);
+      renderAdmin();
+    }, function(e){ $('a-stat').innerHTML = '<span class="warn">' + esc(geoErrMsg(e)) + '</span>'; },
+    {enableHighAccuracy: true, maximumAge: 0, timeout: 20000});
+  };
+
+  function newSpot(lat, lng){ return {id: uid(), name: '스팟 ' + (cfg.spots.length + 1), lat: lat, lng: lng, radius: 30, sound: '', mode: 'loop', volume: 1, enabled: true}; }
+
+  /* 지도 (Leaflet + OpenStreetMap) */
+  var map = null, mapLayer = null, meMarker = null, didFit = false;
+  function loadLeaflet(cb){
+    if (window.L){ cb(); return; }
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(css);
+    var sc = document.createElement('script');
+    sc.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    sc.onload = cb;
+    sc.onerror = function(){ $('a-map').innerHTML = '<div class="empty">지도를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.</div>'; };
+    document.head.appendChild(sc);
+  }
+  function initMap(){
+    map = L.map('a-map').setView([37.5665, 126.978], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+    }).addTo(map);
+    mapLayer = L.layerGroup().addTo(map);
+    map.on('click', function(e){
+      var lat = round6(e.latlng.lat), lng = round6(e.latlng.lng);
+      var box = document.createElement('div');
+      box.innerHTML = '<div style="font-size:12px;color:#8e8e93;margin-bottom:8px">' + lat + ', ' + lng + '</div>';
+      var b = document.createElement('button');
+      b.className = 'mapbtn'; b.innerHTML = '여기에 스팟 추가';
+      b.onclick = function(){
+        map.closePopup();
+        openEditor(newSpot(lat, lng), true);
+        $('e-locstat').innerHTML = '지도에서 지정한 위치입니다.';
+      };
+      box.appendChild(b);
+      L.popup().setLatLng(e.latlng).setContent(box).openOn(map);
+    });
+    renderMap();
+    setTimeout(function(){ map.invalidateSize(); renderMap(); }, 300);
+  }
+  function renderMap(){
+    if (!map) return;
+    mapLayer.clearLayers();
+    for (var i = 0; i < cfg.spots.length; i++){
+      (function(s){
+        var col = s.enabled ? '#e8c27a' : '#777777';
+        var circle = L.circle([s.lat, s.lng], {radius: s.radius, color: col, weight: 1.5, fillColor: col, fillOpacity: 0.15, dashArray: s.enabled ? null : '4 4'}).addTo(mapLayer);
+        var mk = L.marker([s.lat, s.lng], {draggable: true,
+          icon: L.divIcon({className: 'spot-pin' + (s.enabled ? '' : ' off'), html: '<i></i>', iconSize: [22, 22], iconAnchor: [11, 11]})}).addTo(mapLayer);
+        mk.bindTooltip(esc(s.name), {permanent: true, direction: 'top', offset: [0, -12], className: 'spot-tip'});
+        mk.on('drag', function(e){ circle.setLatLng(e.target.getLatLng()); });
+        mk.on('dragend', function(e){
+          var ll = e.target.getLatLng();
+          s.lat = round6(ll.lat); s.lng = round6(ll.lng);
+          saveDraft(); renderAdmin(); toast(s.name + ' 위치를 옮겼습니다');
+        });
+        mk.on('click', function(){ openEditor(s, false); });
+      })(cfg.spots[i]);
+    }
+    if (!didFit && cfg.spots.length){ didFit = true; fitAll(); }
+  }
+  function fitAll(){
+    if (!map || !cfg.spots.length) return;
+    var pts = [];
+    for (var i = 0; i < cfg.spots.length; i++) pts.push([cfg.spots[i].lat, cfg.spots[i].lng]);
+    map.fitBounds(L.latLngBounds(pts).pad(0.3), {maxZoom: 17});
+  }
+  function updateMe(lat, lng){
+    if (!map) return;
+    if (!meMarker) meMarker = L.marker([lat, lng], {interactive: false, icon: L.divIcon({className: 'me-pin', html: '<i></i>', iconSize: [16, 16], iconAnchor: [8, 8]})}).addTo(map);
+    else meMarker.setLatLng([lat, lng]);
+  }
+  function removeMe(){ if (map && meMarker){ map.removeLayer(meMarker); meMarker = null; } }
+  $('a-mapfit').onclick = function(){ if (cfg.spots.length) fitAll(); else toast('등록된 스팟이 없습니다'); };
+  $('a-mapme').onclick = function(){
+    if (!map || !navigator.geolocation){ toast('위치 기능을 사용할 수 없습니다'); return; }
+    toast('내 위치 확인 중…');
+    navigator.geolocation.getCurrentPosition(function(p){
+      map.setView([p.coords.latitude, p.coords.longitude], 17);
+      updateMe(p.coords.latitude, p.coords.longitude);
+    }, function(e){ toast(geoErrMsg(e)); }, {enableHighAccuracy: true, maximumAge: 0, timeout: 15000});
+  };
+  loadLeaflet(initMap);
+
+  /* 내보내기 */
+  function jsonText(){ return JSON.stringify(exportObj(), null, 2); }
+  $('a-export').onclick = function(){
+    var miss = 0;
+    for (var i = 0; i < cfg.spots.length; i++) if (!cfg.spots[i].sound) miss++;
+    if (miss && !confirm('사운드가 지정되지 않은 스팟이 ' + miss + '개 있습니다. 그래도 내려받을까요?')) return;
+    var blob = new Blob([jsonText()], {type: 'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'spots.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  };
+  $('a-copy').onclick = function(){
+    var t = jsonText();
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){ toast('복사했습니다. GitHub의 spots.json 편집 화면에 붙여넣으세요'); })['catch'](function(){ fallbackCopy(t); });
+    } else fallbackCopy(t);
+  };
+  function fallbackCopy(t){
+    var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta);
+    ta.select(); try { document.execCommand('copy'); toast('복사했습니다'); } catch(e){ toast('복사 실패'); }
+    document.body.removeChild(ta);
+  }
+  $('a-reload').onclick = function(){
+    if (!confirm('이 기기의 임시 작업을 버리고 서버(GitHub)에 올라가 있는 설정을 다시 불러올까요?')) return;
+    loadServerConfig(function(c, err){
+      if (!c){ toast(err); return; }
+      cfg = c; try { localStorage.removeItem(DRAFT_KEY); } catch(e){}
+      bindSettings(); renderAdmin(); didFit = false; renderMap(); toast('서버 설정을 불러왔습니다');
+    });
+  };
+}
+
+if (ADMIN) initAdmin(); else initListener();
+})();
+</script>
+</body>
+</html>
