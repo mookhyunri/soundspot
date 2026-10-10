@@ -4,5 +4,149 @@
   "fadeSec": 3,
   "accMax": 50,
   "showSpots": true,
-  "spots": []
+  "spots": [
+    {
+      "id": "smv2e3bivsj47",
+      "name": "09_여치길_파주",
+      "lat": 37.77028,
+      "lng": 126.702487,
+      "radius": 30,
+      "sound": "9_09.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2e9q2zcrxv",
+      "name": "기록법흥_오전5시",
+      "lat": 37.771978,
+      "lng": 126.703555,
+      "radius": 30,
+      "sound": "bh_01.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2edaz20li7",
+      "name": "기록법흥_목적성에관하여",
+      "lat": 37.772674,
+      "lng": 126.702093,
+      "radius": 30,
+      "sound": "bh_02.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2eeivy8wny",
+      "name": "기록법흥_오후5시",
+      "lat": 37.766387,
+      "lng": 126.686702,
+      "radius": 30,
+      "sound": "bh_03.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2egnas0acz",
+      "name": "기록법흥_실용성에관하여",
+      "lat": 37.770551,
+      "lng": 126.700886,
+      "radius": 30,
+      "sound": "bh_04",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2emno4c35w",
+      "name": "9_무지개마을_남해",
+      "lat": 34.744689,
+      "lng": 127.896872,
+      "radius": 30,
+      "sound": "9_01.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2eparoy2lw",
+      "name": "9_탑동광장_제주",
+      "lat": 33.517922,
+      "lng": 126.52695,
+      "radius": 30,
+      "sound": "9_02.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2ey8r1fmjt",
+      "name": "9_낙산_양양",
+      "lat": 38.113199,
+      "lng": 128.636878,
+      "radius": 30,
+      "sound": "9_03.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2f2m93igtx",
+      "name": "9_산_원주",
+      "lat": 37.415805,
+      "lng": 127.823707,
+      "radius": 30,
+      "sound": "9_04.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2f9jwuzxqn",
+      "name": "9_욜라탱고_대전",
+      "lat": 36.326724,
+      "lng": 127.423873,
+      "radius": 30,
+      "sound": "9_05.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2fhw72ksdw",
+      "name": "9_영빈회관_익산",
+      "lat": 35.938814,
+      "lng": 126.948853,
+      "radius": 30,
+      "sound": "9_06.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2fkbomz042",
+      "name": "9_봉의산_춘천",
+      "lat": 37.886146,
+      "lng": 127.731302,
+      "radius": 30,
+      "sound": "9_07.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    },
+    {
+      "id": "smv2fofmxjbn8",
+      "name": "9_태평로_중구",
+      "lat": 37.568837,
+      "lng": 126.976427,
+      "radius": 30,
+      "sound": "9_08.mp3",
+      "mode": "loop",
+      "volume": 1,
+      "enabled": true
+    }
+  ]
 }
