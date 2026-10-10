@@ -55,7 +55,7 @@
       "lat": 37.770551,
       "lng": 126.700886,
       "radius": 30,
-      "sound": "bh_04",
+      "sound": "bh_04.mp3",
       "mode": "loop",
       "volume": 1,
       "enabled": true
